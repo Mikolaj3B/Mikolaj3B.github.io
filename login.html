@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/login/login.css" />
+    <title>Quiz Temple</title>
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="header__title">Login</h1>
+      <nav class="header__navigation">
+        <a href="/index.html" class="navigation__buttons">Home</a>
+        <a href="/login.html" class="navigation__buttons">Login</a>
+        <a href="/register.html" class="navigation__buttons">Register</a>
+        <a href="/contact.html" class="navigation__buttons">Contact</a>
+      </nav>
+    </header>
+    <main class="main">
+      <form action="/loginform.php" class="main__form">
+        <div class="main__form--flex">
+          <label for="mail">
+            Mail:
+            <input
+              type="email"
+              id="mail"
+              name="mail"
+              class="main__form--inputs"
+            />
+          </label>
+          <label for="pass">
+            Password:
+            <input
+              type="password"
+              id="pass"
+              name="pass"
+              class="main__form--inputs"
+            />
+          </label>
+        </div>
+        <input type="submit" name="sub" id="sub" class="main__form--submit" />
+      </form>
+    </main>
+    <footer class="footer">
+      <span class="footer__copyright">Mikołaj Zieba 2021 &copy; </span>
+    </footer>
+  </body>
+</html>
