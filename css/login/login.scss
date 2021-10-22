@@ -1,5 +1,6 @@
 .main {
   text-align: left;
+
   .main__form--flex {
     width: 50vw;
     display: flex;
@@ -8,14 +9,18 @@
     flex-wrap: nowrap;
     justify-content: center;
   }
-  .main__form--flex > * {
+
+  .main__form--flex>* {
     margin: 1vw;
   }
+
   .main__form--inputs {
     padding: 0.5vw;
     margin: 0.3vw;
     background-color: #363636;
+    border: #000000;
   }
+
   .main__form--submit {
     display: block;
     margin: 0 auto;
@@ -32,9 +37,11 @@
     text-decoration: none;
     text-shadow: 0px 0px 10px #000000;
   }
+
   .main__form--submit:hover {
     background-color: #545454;
   }
+
   .main__form--submit:active {
     position: relative;
     top: 1px;
