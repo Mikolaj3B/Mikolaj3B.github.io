@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Game</title>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script type="text/javascript" src="js/three.min.js"></script>
+    <script type="text/javascript" src="js/physi.js"></script>
+    <script type="module">
+      import { GLTFLoader } from "/js/GLTFLoader.js";
+      import { OrbitControls } from "/js/OrbitControls.js";
+
+      ("use strict");
+
+      Physijs.scripts.worker = "/js/physijs_worker.js";
+      Physijs.scripts.ammo = "/js/ammo.js";
+
+      function main() {
+        let root;
+        let camera, scene, renderer;
+        // let mixer;
+        let controls;
+        init();
+        animate();
+        function init() {
+          let loadedlogo;
+          let fov = 31.634;
+          let aspect = window.innerWidth / window.innerHeight;
+          let near = 0.01;
+          let far = 1000;
+          let controls;
+          let canvas = document.querySelector("#c");
+          scene = new Physijs.Scene({ fixedTimeStep: 1 / 60 });
+          scene.setGravity(new THREE.Vector3(0, -30, 0));
+          scene.addEventListener("update", function () {
+            scene.simulate(undefined, 1);
+          });
+          renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias: true,
+          });
+
+          renderer.setClearColor("#111111");
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.physicallyCorrectLights = true;
+
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMapSoft = true;
+
+          renderer.shadowCameraNear = 0.01;
+          renderer.shadowCameraFar = 1000;
+          renderer.shadowCameraFov = 30;
+
+          renderer.shadowMapBias = 0.01;
+          renderer.shadowMapDarkness = 0.5;
+          renderer.shadowMapWidth = 2048;
+          renderer.shadowMapHeight = 2048;
+          renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+          let positionx = 0.04097498953342438;
+          let positiony = 0.02954433618791578;
+          let positionz = 0.08118166029453278;
+
+          {
+            //DirectionalLight
+            var color = 0xffffff;
+            var intensity = 0.7;
+            var light = new THREE.DirectionalLight(color, intensity);
+            light.position.set(-500, 500, 500);
+            light.target.position.set(positionx, positiony, positionz);
+            scene.add(light);
+            scene.add(light.target);
+          }
+          {
+            //DirectionalLight2
+            var color = 0xffffff;
+            var intensity = 0.7;
+            var light = new THREE.DirectionalLight(color, intensity);
+            light.position.set(500, 500, 500);
+            light.target.position.set(positionx, positiony, positionz);
+            scene.add(light);
+            scene.add(light.target);
+          }
+          {
+            //AmbientLight
+            const light = new THREE.AmbientLight(0x404040, 3);
+            light.position.set(10, 5, -10);
+            scene.add(light);
+          }
+
+          {
+            let gltfloader = new GLTFLoader();
+            gltfloader.load("./auto.glb", function (gltf) {
+              root = gltf.scene;
+              gltf.scene.position.set(0, 0, 0);
+
+              root.children[0].geometry.computeVertexNormals(true);
+              root.children[1].geometry.computeVertexNormals(true);
+              //shadows
+              root.children[1].castShadow = true;
+              root.children[0].receiveShadow = true;
+
+              root.children[0].encoding = THREE.LinearEncoding;
+              root.children[1].encoding = THREE.LinearEncoding;
+
+              let groundtexture = new THREE.TextureLoader().load("/ground.jpg");
+              groundtexture.wrapS = groundtexture.wrapT = THREE.RepeatWrapping;
+              groundtexture.repeat.set(50, 50);
+              groundtexture.anisotropy = 16;
+              groundtexture.encoding = THREE.sRGBEncoding;
+              let plane = new Physijs.BoxMesh(
+                new THREE.PlaneBufferGeometry(1000, 1000),
+                new THREE.MeshStandardMaterial({ map: groundtexture })
+              );
+              plane.position.y = 0.0;
+              plane.rotation.x = -Math.PI / 2;
+              plane.receiveShadow = true;
+
+              // let controlbox = new Physijs.BoxMesh( new THREE.BoxGeometry( 1, 1, 1), new THREE.MeshStandardMaterial( { map: groundtexture } ))
+              // controlbox.position.y = 6.0;
+              // scene.add(controlbox);
+              let x = new THREE.Group();
+              x.position.x = 0;
+              x.position.y = 0;
+              x.position.z = 0;
+              x.rotation.x = -Math.PI / 2;
+              let auto = new Physijs.BoxMesh(
+                root.children[1].geometry,
+                root.children[1].material,
+                1
+              );
+              auto.position.y = 10;
+              auto.rotation.x = Math.PI / 2;
+              auto._physijs.depth = 0.43;
+              auto._physijs.height = 0.59;
+              scene.add(plane);
+
+              let xvelocity;
+              let oldvel, newvel;
+
+              auto.__dirtyPosition = true;
+              scene.add(auto);
+              auto.add(x);
+              camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+              // camera.rotation.set(-1.56, 0, 0);
+              camera.near = 0.01;
+              camera.far = 1000.0;
+
+              x.add(camera);
+              camera.position.set(10, 0, -2.5);
+              camera.lookAt(auto.position);
+              // auto.setLinearVelocity(new THREE.Vector3(-100, 0, 0));
+              controls = new OrbitControls(camera, renderer.domElement);
+              controls.update();
+              document.addEventListener(
+                "mousemove",
+                onDocumentMouseMove,
+                false
+              );
+              function onDocumentMouseMove(event) {
+                // Manually fire the event in OrbitControls
+                controls.handleMouseMoveRotate(event);
+              }
+              controls.dispose();
+              window.addEventListener("resize", () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+              });
+              // physics
+
+              let input = {
+                power: null,
+                direction: null,
+                steering: 0,
+              };
+              document.addEventListener("keydown", function (ev) {
+                switch (ev.keyCode) {
+                  case 65: // left
+                    input.direction = 1;
+                    xvelocity = -1;
+                    break;
+
+                  case 87: // forward
+                    input.power = true;
+
+                    break;
+
+                  case 68: // right
+                    input.direction = -1;
+                    xvelocity = 1;
+                    break;
+
+                  case 83: // back
+                    input.power = false;
+                    break;
+                }
+                if (input.power == true) {
+                }
+              });
+              document.addEventListener("keyup", function (ev) {
+                switch (ev.keyCode) {
+                  case 65: // left
+                    input.direction = null;
+                    xvelocity = 0;
+                    break;
+
+                  case 87: // forward
+                    input.power = null;
+                    break;
+
+                  case 68: // right
+                    input.direction = null;
+                    xvelocity = 0;
+                    break;
+
+                  case 83: // back
+                    input.power = null;
+                    break;
+                }
+                if (input.power == true) {
+                }
+              });
+            });
+          }
+        }
+
+        function resizeRendererToDisplaySize(renderer) {
+          let canvas = renderer.domElement;
+          let width = canvas.clientWidth;
+          let height = canvas.clientHeight;
+          let needResize = canvas.width !== width || canvas.height !== height;
+          if (needResize) {
+            renderer.setSize(width, height, false);
+          }
+          return needResize;
+        }
+        function animate() {
+          requestAnimationFrame(animate);
+          // controls.update();
+
+          camera.lookAt(scene.children[6].position);
+
+          scene.simulate();
+          renderer.render(scene, camera);
+        }
+      }
+      main();
+    </script>
+  </body>
+</html>
