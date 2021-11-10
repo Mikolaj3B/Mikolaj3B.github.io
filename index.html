@@ -85,9 +85,9 @@
 
           {
             // DirectionalLight;
-            var color = 0xffffff;
-            var intensity = 0.7;
-            var swiatlo = new THREE.DirectionalLight(color, intensity);
+            let color = 0xffffff;
+            let intensity = 0.7;
+            let swiatlo = new THREE.DirectionalLight(color, intensity);
             swiatlo.position.set(-500, 500, 500);
             swiatlo.target.position.set(positionx, positiony, positionz);
             scene.add(swiatlo);
@@ -95,9 +95,9 @@
           }
           {
             //DirectionalLight2
-            var color = 0xffffff;
-            var intensity = 0.7;
-            var swiatlo = new THREE.DirectionalLight(color, intensity);
+            let color = 0xffffff;
+            let intensity = 0.7;
+            let swiatlo = new THREE.DirectionalLight(color, intensity);
             swiatlo.position.set(500, 500, 500);
             swiatlo.target.position.set(positionx, positiony, positionz);
             scene.add(swiatlo);
@@ -126,12 +126,12 @@
           scene.add(light);
 
           {
-            var loader = new THREE.LegacyJSONLoader();
+            let loader = new THREE.LegacyJSONLoader();
             loader.load("models/mustang.js", function (car, car_materials) {
               loader.load(
                 "models/mustang_wheel.js",
                 function (wheel, wheel_materials) {
-                  var mesh = new Physijs.BoxMesh(
+                  let mesh = new Physijs.BoxMesh(
                     car,
                     new THREE.MeshFaceMaterial(car_materials)
                   );
@@ -159,11 +159,11 @@
                   window.vehicle = vehicle;
                   window.scene = scene;
 
-                  var wheel_material = new THREE.MeshFaceMaterial(
+                  let wheel_material = new THREE.MeshFaceMaterial(
                     wheel_materials
                   );
 
-                  for (var i = 0; i < 4; i++) {
+                  for (let i = 0; i < 4; i++) {
                     vehicle.addWheel(
                       wheel,
                       wheel_material,
@@ -201,6 +201,15 @@
 
                       case 83: // back
                         input.power = false;
+                        break;
+                      case 82:
+                        vehicle.mesh.__dirtyPosition = true;
+                        vehicle.mesh.__dirtyRotation = true;
+                        vehicle.mesh.position.y = 10;
+                        console.log(vehicle.mesh.rotation);
+                        vehicle.mesh.rotation.x = -0.00865306612160654;
+                        vehicle.mesh.rotation.y = -8.403741645053659e-8;
+                        vehicle.mesh.rotation.z = -4.627902648261606e-10;
                         break;
                     }
                   });
